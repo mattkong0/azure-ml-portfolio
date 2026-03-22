@@ -1,0 +1,152 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "\n",
+        "# Create and save a sample dataset\n",
+        "data = {\n",
+        "    \"customer_id\": [1, 2, 3, 4, 5],\n",
+        "    \"membership_level\": [\"Bronze\", \"Silver\", \"Gold\", \"Silver\", \"Bronze\"]\n",
+        "}\n",
+        "\n",
+        "# Create a DataFrame\n",
+        "df = pd.DataFrame(data)\n",
+        "\n",
+        "# Save the DataFrame to a CSV file\n",
+        "csv_filename = \"customer_data.csv\"\n",
+        "df.to_csv(csv_filename, index=False)\n",
+        "\n",
+        "# Load the dataset\n",
+        "incoming_data = pd.read_csv(csv_filename)\n",
+        "\n",
+        "# Validate the data\n",
+        "def validate_data(df):\n",
+        "    # Check for null values in 'customer_id'\n",
+        "    if df['customer_id'].isnull().any():\n",
+        "        print(\"Validation Error: 'customer_id' column contains null values.\")\n",
+        "    else:\n",
+        "        print(\"No null values in 'customer_id' column.\")\n",
+        "\n",
+        "    # Check that 'membership_level' contains only allowed values\n",
+        "    allowed_values = {\"Bronze\", \"Silver\", \"Gold\"}\n",
+        "    invalid_values = set(df['membership_level']) - allowed_values\n",
+        "    if invalid_values:\n",
+        "        print(f\"Validation Error: 'membership_level' contains invalid values: {invalid_values}\")\n",
+        "    else:\n",
+        "        print(\"All values in 'membership_level' are valid.\")\n",
+        "\n",
+        "# Run validation\n",
+        "validate_data(incoming_data)"
+      ],
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": "No null values in 'customer_id' column.\nAll values in 'membership_level' are valid.\n"
+        }
+      ],
+      "execution_count": 1,
+      "metadata": {
+        "gather": {
+          "logged": 1775588593802
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from azureml.core import Workspace\n",
+        "\n",
+        "# Connect to Azure ML Workspace\n",
+        "workspace = Workspace.from_config()\n",
+        "\n",
+        "# Access the deployed service\n",
+        "service_name = 'my-custom-env-service'\n",
+        "service = workspace.webservices[service_name]\n",
+        "\n",
+        "# Enable Application Insights if not already enabled\n",
+        "if not service.app_insights_enabled:\n",
+        "    service.update(enable_app_insights=True)\n",
+        "    print(f\"Application Insights enabled for service: {service_name}\")\n",
+        "else:\n",
+        "    print(f\"Application Insights is already enabled for service: {service_name}\")\n",
+        "\n",
+        "# Check the Application Insights link\n",
+        "print(f\"Application Insights URL: {service.scoring_uri}\")"
+      ],
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "AttributeError",
+          "evalue": "'AciWebservice' object has no attribute 'app_insights_enabled'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mAttributeError\u001b[0m                            Traceback (most recent call last)",
+            "Cell \u001b[0;32mIn[3], line 11\u001b[0m\n\u001b[1;32m      8\u001b[0m service \u001b[38;5;241m=\u001b[39m workspace\u001b[38;5;241m.\u001b[39mwebservices[service_name]\n\u001b[1;32m     10\u001b[0m \u001b[38;5;66;03m# Enable Application Insights if not already enabled\u001b[39;00m\n\u001b[0;32m---> 11\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m \u001b[38;5;129;01mnot\u001b[39;00m \u001b[43mservice\u001b[49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43mapp_insights_enabled\u001b[49m:\n\u001b[1;32m     12\u001b[0m     service\u001b[38;5;241m.\u001b[39mupdate(enable_app_insights\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m)\n\u001b[1;32m     13\u001b[0m     \u001b[38;5;28mprint\u001b[39m(\u001b[38;5;124mf\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mApplication Insights enabled for service: \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mservice_name\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m\"\u001b[39m)\n",
+            "\u001b[0;31mAttributeError\u001b[0m: 'AciWebservice' object has no attribute 'app_insights_enabled'"
+          ]
+        }
+      ],
+      "execution_count": 3,
+      "metadata": {
+        "gather": {
+          "logged": 1775589544394
+        }
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Apply canary deployment to a limited number of users\n",
+        "# This is pseudocode; it shows the business logic, but isn’t a full implementation\n",
+        "canary_deployment_successful = service.canary_deploy()\n",
+        "if canary_deployment_successful:\n",
+        "    print(\"Canary deployment successful. Proceeding to full deployment.\")\n",
+        "else:\n",
+        "    print(\"Canary deployment failed. Investigate issues before full deployment.\")"
+      ],
+      "outputs": [],
+      "execution_count": null,
+      "metadata": {}
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python38-azureml",
+      "language": "python",
+      "display_name": "Python 3.10 - AzureML"
+    },
+    "language_info": {
+      "name": "python",
+      "version": "3.10.11",
+      "mimetype": "text/x-python",
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "pygments_lexer": "ipython3",
+      "nbconvert_exporter": "python",
+      "file_extension": ".py"
+    },
+    "microsoft": {
+      "ms_spell_check": {
+        "ms_spell_check_language": "en"
+      },
+      "host": {
+        "AzureML": {
+          "notebookHasBeenCompleted": true
+        }
+      }
+    },
+    "kernel_info": {
+      "name": "python38-azureml"
+    },
+    "nteract": {
+      "version": "nteract-front-end@1.0.0"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 2
+}
