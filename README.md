@@ -1,4 +1,4 @@
-# ML Project
+# Azure ML Portfolio
 ## Directory Structure
 - `data/`: Raw and processed datasets
 - `notebooks/`: Jupyter notebooks
